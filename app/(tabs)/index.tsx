@@ -1,98 +1,124 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// 도감 탭: 어류 목록을 보여주는 화면입니다.
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { FISH_LIST, Fish } from '@/data/fish';
 
-export default function HomeScreen() {
+export default function EncyclopediaScreen() {
+  // useState: React의 "상태". search 값이 바뀌면 화면이 자동으로 다시 그려집니다.
+  const [search, setSearch] = useState('');
+
+  // router: 다른 화면으로 이동할 때 사용합니다.
+  const router = useRouter();
+
+  // 검색어가 이름에 포함된 어류만 걸러냅니다.
+  // search가 빈 문자열이면 includes('')는 항상 true라서 전체가 보입니다.
+  const filteredFish = FISH_LIST.filter((fish) => fish.name.includes(search));
+
+  // 목록의 한 줄(카드)을 그리는 함수입니다.
+  const renderItem = ({ item }: { item: Fish }) => (
+    <Pressable
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      onPress={() => router.push(`/fish/${item.id}`)}>
+      <Text style={styles.emoji}>{item.emoji}</Text>
+      <View style={styles.cardText}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.scientificName}>{item.scientificName}</Text>
+      </View>
+      <Text style={styles.chevron}>›</Text>
+    </Pressable>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>🐟 어류 도감</Text>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="어류 이름 검색"
+        value={search}
+        onChangeText={setSearch}
+      />
+      {/* FlatList: 긴 목록을 효율적으로 그려주는 컴포넌트. 웹의 map()과 비슷한 역할 */}
+      <FlatList
+        data={filteredFish}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={<Text style={styles.empty}>검색 결과가 없어요 🥲</Text>}
+      />
+    </SafeAreaView>
   );
 }
 
+// 스타일: 웹의 CSS와 비슷하지만 JavaScript 객체로 씁니다. (camelCase 주의: background-color → backgroundColor)
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1, // 화면 전체를 차지
+    backgroundColor: '#f0f7fa',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginHorizontal: 20,
+  },
+  searchInput: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    marginHorizontal: 20,
+    marginVertical: 12,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  card: {
+    flexDirection: 'row', // 가로 배치 (이모지 | 이름 | 화살표)
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  cardPressed: {
+    opacity: 0.6,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emoji: {
+    fontSize: 36,
+    marginRight: 14,
+  },
+  cardText: {
+    flex: 1, // 남는 가로 공간을 모두 차지 → 화살표가 오른쪽 끝으로 밀림
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  scientificName: {
+    fontSize: 13,
+    color: '#888',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+  chevron: {
+    fontSize: 24,
+    color: '#bbb',
+  },
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+    color: '#888',
   },
 });
