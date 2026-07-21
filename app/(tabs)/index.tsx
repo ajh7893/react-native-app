@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   FlatList,
+  Image,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
   View,
 } from 'react-native';
 
+import { useFavorites } from '@/context/favorites';
 import { FISH_LIST, Fish } from '@/data/fish';
 
 export default function EncyclopediaScreen() {
@@ -19,6 +21,9 @@ export default function EncyclopediaScreen() {
 
   // router: 다른 화면으로 이동할 때 사용합니다.
   const router = useRouter();
+
+  // 즐겨찾기 여부를 목록에서 별표로 표시하기 위해 가져옵니다.
+  const { isFavorite } = useFavorites();
 
   // 검색어가 이름에 포함된 어류만 걸러냅니다.
   // search가 빈 문자열이면 includes('')는 항상 true라서 전체가 보입니다.
@@ -29,11 +34,17 @@ export default function EncyclopediaScreen() {
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={() => router.push(`/fish/${item.id}`)}>
-      <Text style={styles.emoji}>{item.emoji}</Text>
+      {item.image ? (
+        <Image source={item.image} style={styles.thumbnail} />
+      ) : (
+        <Text style={styles.emoji}>{item.emoji}</Text>
+      )}
       <View style={styles.cardText}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.scientificName}>{item.scientificName}</Text>
       </View>
+      {/* 즐겨찾기한 어류면 별표를 보여줍니다 */}
+      {isFavorite(item.id) && <Text style={styles.star}>⭐</Text>}
       <Text style={styles.chevron}>›</Text>
     </Pressable>
   );
@@ -98,6 +109,12 @@ const styles = StyleSheet.create({
     fontSize: 36,
     marginRight: 14,
   },
+  thumbnail: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    marginRight: 14,
+  },
   cardText: {
     flex: 1, // 남는 가로 공간을 모두 차지 → 화살표가 오른쪽 끝으로 밀림
   },
@@ -110,6 +127,10 @@ const styles = StyleSheet.create({
     color: '#888',
     fontStyle: 'italic',
     marginTop: 2,
+  },
+  star: {
+    fontSize: 16,
+    marginRight: 6,
   },
   chevron: {
     fontSize: 24,

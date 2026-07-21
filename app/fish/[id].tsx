@@ -2,13 +2,17 @@
 // 파일 이름이 [id].tsx 인 것이 포인트! expo-router의 "동적 라우트"로,
 // /fish/1, /fish/2 ... 처럼 어떤 id로 접근해도 이 화면 하나가 처리합니다.
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useFavorites } from '@/context/favorites';
 import { FISH_LIST } from '@/data/fish';
 
 export default function FishDetailScreen() {
   // 주소의 [id] 부분 값을 꺼냅니다. /fish/3 으로 왔다면 id === '3'
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // 즐겨찾기 통로에서 필요한 것만 꺼냅니다.
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const fish = FISH_LIST.find((f) => f.id === id);
 
@@ -22,10 +26,25 @@ export default function FishDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* 화면 상단 헤더의 제목을 어류 이름으로 설정 */}
-      <Stack.Screen options={{ title: fish.name }} />
+      {/* 화면 상단 헤더의 제목을 어류 이름으로 설정.
+          headerRight: 헤더 오른쪽에 별표 버튼을 넣습니다. 누르면 즐겨찾기 토글. */}
+      <Stack.Screen
+        options={{
+          title: fish.name,
+          headerBackTitle: '도감',
+          headerRight: () => (
+            <Pressable onPress={() => toggleFavorite(fish.id)} hitSlop={12}>
+              <Text style={styles.headerStar}>{isFavorite(fish.id) ? '⭐' : '☆'}</Text>
+            </Pressable>
+          ),
+        }}
+      />
 
-      <Text style={styles.emoji}>{fish.emoji}</Text>
+      {fish.image ? (
+        <Image source={fish.image} style={styles.photo} />
+      ) : (
+        <Text style={styles.emoji}>{fish.emoji}</Text>
+      )}
       <Text style={styles.name}>{fish.name}</Text>
       <Text style={styles.scientificName}>{fish.scientificName}</Text>
 
@@ -63,8 +82,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerStar: {
+    fontSize: 22,
+  },
   emoji: {
     fontSize: 80,
+    marginTop: 12,
+  },
+  photo: {
+    width: 220,
+    height: 220,
+    borderRadius: 16,
     marginTop: 12,
   },
   name: {
