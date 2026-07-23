@@ -5,6 +5,8 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useFavorites } from '@/context/favorites';
+import { useSeen } from '@/context/seen';
+
 import { FISH_LIST } from '@/data/fish';
 
 export default function FishDetailScreen() {
@@ -13,6 +15,8 @@ export default function FishDetailScreen() {
 
   // 즐겨찾기 통로에서 필요한 것만 꺼냅니다.
   const { isFavorite, toggleFavorite } = useFavorites();
+  //  본 어류를 본 적이 있는지 확인하고, 없으면 "봤다"로 표시합니다.
+  const { isSeen, toggleSeen } = useSeen();
 
   const fish = FISH_LIST.find((f) => f.id === id);
 
@@ -47,6 +51,14 @@ export default function FishDetailScreen() {
       )}
       <Text style={styles.name}>{fish.name}</Text>
       <Text style={styles.scientificName}>{fish.scientificName}</Text>
+
+      <Pressable
+        style={[ styles.seenButton, isSeen(fish.id) && styles.seenButtonActive]}
+        onPress ={() => toggleSeen(fish.id)}>
+        <Text style={styles.seenButtonText}>
+          {isSeen(fish.id) ? '👀 봤어요!' : '🔍  아직 못봣어요'}
+        </Text>
+      </Pressable>
 
       <View style={styles.infoBox}>
         <InfoRow label="서식지" value={fish.habitat} />
@@ -130,4 +142,19 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     marginTop: 24,
   },
+  seenButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  seenButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: '#eee',
+  },
+  seenButtonActive: {
+    backgroundColor: '#cce5ff',
+  },
 });
+
