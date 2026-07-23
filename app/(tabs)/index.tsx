@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   thumbnail: {
-    width: 48,
+    width: 72, // 가로로 긴 3:2 비율 → 물고기 사진이 덜 잘려 보입니다
     height: 48,
     borderRadius: 8,
     marginRight: 14,

@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   photo: {
-    width: 220,
+    width: 300,
     height: 220,
     borderRadius: 16,
     marginTop: 12,

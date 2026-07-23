@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   thumbnail: {
-    width: 48,
+    width: 72, // 도감 탭과 동일한 3:2 비율
     height: 48,
     borderRadius: 8,
     marginRight: 14,
