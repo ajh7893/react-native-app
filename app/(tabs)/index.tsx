@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import { useFavorites } from '@/context/favorites';
+import { useSeen } from '@/context/seen';
 import { FISH_LIST, Fish } from '@/data/fish';
 
 export default function EncyclopediaScreen() {
@@ -24,6 +25,7 @@ export default function EncyclopediaScreen() {
 
   // 즐겨찾기 여부를 목록에서 별표로 표시하기 위해 가져옵니다.
   const { isFavorite } = useFavorites();
+  const { isSeen } = useSeen();
 
   // 검색어가 이름에 포함된 어류만 걸러냅니다.
   // search가 빈 문자열이면 includes('')는 항상 true라서 전체가 보입니다.
@@ -45,6 +47,7 @@ export default function EncyclopediaScreen() {
       </View>
       {/* 즐겨찾기한 어류면 별표를 보여줍니다 */}
       {isFavorite(item.id) && <Text style={styles.star}>⭐</Text>}
+      {isSeen(item.id) && <Text style={styles.star}> 👀</Text>}
       <Text style={styles.chevron}>›</Text>
     </Pressable>
   );
